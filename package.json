@@ -1,0 +1,19 @@
+{
+  "name": "palimpsest",
+  "productName": "Palimpsest",
+  "version": "1.0.0",
+  "description": "An elemental spellcraft adventure",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "dev": "node server.cjs",
+    "test": "node --test tests/*.test.cjs",
+    "build": "node build.cjs"
+  },
+  "keywords": [],
+  "author": "Palimpsest",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {"electron":"^41.0.0","@electron/packager":"20.3.0"},
+  "type": "commonjs"
+}
