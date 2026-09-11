@@ -40,7 +40,7 @@ if(element==='fire'&&traits.burns&&!(e.wet>0))e.burn=3.2;
 if(element==='earth')e.stun=.2;
 if(element==='shadow'&&e.hp>0){const duration=C.fearDuration(e,damage);if(duration>0){if(!(e.fear>0))this.float(e.x,e.y-40,'Страх','#ba9cdb');e.fear=Math.max(e.fear||0,duration);e.fearX=ox;e.fearY=oy;}}
 const d=Math.hypot(e.x-ox,e.y-oy)||1;if(element==='air'&&e.kind!=='boss')this.move(e,(e.x-ox)/d*70,(e.y-oy)/d*70);if(element==='space'&&e.kind!=='boss')this.move(e,(ox-e.x)/d*48,(oy-e.y)/d*48);
-this.float(e.x,e.y-18,n===0?'Невосприимчив':n<damage*.4?'Сопротивление · '+Math.max(1,Math.round(n)):''+Math.round(n),MANA.find(m=>m.id===element).color);this.burstParticles(e.x,e.y,MANA.find(m=>m.id===element).color,6);e.flash=.12;
+this.float(e.x,e.y-18,n===0?'Невосприимчив':C.multiplier(e,element)<.4?'Сопротивление · '+Math.max(1,Math.round(n)):''+Math.round(n),MANA.find(m=>m.id===element).color);this.burstParticles(e.x,e.y,MANA.find(m=>m.id===element).color,6);e.flash=.12;
 if(spell.mod==='chain'){const targets=this.s.enemies.filter(t=>t.id!==e.id&&t.hp>0&&dist(t,e)<160).slice(0,2);for(const t of targets){this.hit(t,damage*.6,{...spell,mod:'plain'},e.x,e.y);this.ring(t.x,t.y,24,'#f0d995');}}
 }
 updateAfflictions(e,dt){

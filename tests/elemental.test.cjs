@@ -74,6 +74,7 @@ test('environment kill grants its reward only once',()=>{
 test('damage events record actual health loss, excluding shield and overkill',()=>{
   const {sim,e,s}=fixture();e.hp=2;cast(sim,e,'earth',100);
   const event=sim.events.find(x=>x.type==='damage'&&x.target==='enemy');assert.equal(event.amount,2);
+  assert.ok(!sim.floaters.some(x=>x.text.includes('Сопротивление')),'Overkill must not be reported as resistance');
   sim.events=[];s.player.shield=20;sim.hurt(10);assert.equal(sim.events.filter(x=>x.type==='damage').length,0);
   sim.invincible=0;sim.hurt(15);assert.equal(sim.events.find(x=>x.type==='damage').amount,5);
 });
