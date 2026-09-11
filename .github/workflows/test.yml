@@ -17,6 +17,7 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check core.js
+          node --check combat-rules.js
           node --check simulation.js
           node --check renderer.js
           node --check game.js
