@@ -1,7 +1,7 @@
 (function(root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.Knowledge = factory();
-})(globalThis, function() {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./spellcraft.js'));
+  else root.Knowledge = factory(root.Spellcraft);
+})(globalThis, function(S) {
   'use strict';
   const BASIC = ['earth', 'water', 'air'];
   const FACTS = {};
@@ -50,9 +50,11 @@
     for (const [result,text] of Object.entries({immune:'не причинило вреда',resist:'вызвало сопротивление',strong:'оказалось особенно сильным',normal:'нанесло обычный урон'}))
       fact(`hit:${e}:${body}:${result}`,e,'effect',`Заклинание против ${label} ${text}.`);
   }
+  for(const [id,r] of Object.entries(S.REACTIONS)){fact('reaction:'+id,r.pair[0],'reaction',r.text);FACTS['reaction:'+id].elements=r.pair;}
+  for(const [e,from,to,text] of [['fire','ice','water','Огонь растапливает лёд.'],['earth','ice','soil','Земля заменяет лёд сушей.'],['earth','mud','soil','Земля осушает топь.'],['water','mud','water','Вода затопляет топь.'],['life','mud','tree','Жизнь выращивает рощу из топи.']])fact('terrain:'+e+':'+from+':'+to,e,'effect',text);
   function initial() { return { known:[...BASIC], facts:BASIC.map(e=>'source:'+e) }; }
-  function valid(k, ids) { return !!(k && Array.isArray(k.known) && Array.isArray(k.facts) && k.known.every(e=>ids.includes(e)) && new Set(k.known).size===k.known.length && BASIC.every(e=>k.known.includes(e)) && k.facts.every(id=>FACTS[id] && k.known.includes(FACTS[id].element)) && new Set(k.facts).size===k.facts.length); }
-  function observe(k, id) { const f=FACTS[id]; if(!f||k.facts.includes(id))return false; if(!k.known.includes(f.element))k.known.push(f.element); k.facts.push(id); return true; }
+  function valid(k, ids) { return !!(k && Array.isArray(k.known) && Array.isArray(k.facts) && k.known.every(e=>ids.includes(e)) && new Set(k.known).size===k.known.length && BASIC.every(e=>k.known.includes(e)) && k.facts.every(id=>FACTS[id] && (FACTS[id].elements||[FACTS[id].element]).every(e=>k.known.includes(e))) && new Set(k.facts).size===k.facts.length); }
+  function observe(k, id) { const f=FACTS[id]; if(!f||k.facts.includes(id))return false; for(const e of f.elements||[f.element])if(!k.known.includes(e))k.known.push(e); k.facts.push(id); return true; }
   function entries(k, element, kind) { return k.facts.map(id=>FACTS[id]).filter(f=>f.element===element&&(!kind||f.kind===kind)); }
   function view(k, mana) { const known=k.known.includes(mana.id); return {...mana, known, name:known?mana.name:'Неизвестно', color:known?mana.color:'#81918f', glyph:known?mana.glyph:'?', source:entries(k,mana.id,'source').map(f=>f.text).join(' ')||'Источник ещё не установлен. Наблюдайте за сосудом в разных условиях.'}; }
   return { BASIC, FACTS, initial, valid, observe, entries, view };
