@@ -26,7 +26,8 @@
   const profile = creature => CREATURES[typeof creature === 'string' ? creature : creature.kind] || fallback;
 
   function multiplier(creature, element) {
-    let factor = profile(creature).resist[element] ?? 1;
+    const body=profile(creature).body;
+    let factor = element==='blood' ? (body==='living'?1.1:0) : element==='death' ? ({living:1.2,stone:0.15,construct:0.1,spirit:1.25,undead:0.3,arcane:0.8}[body]??1) : profile(creature).resist[element] ?? 1;
     if (creature.kind === 'boss') {
       if (creature.ward === element) factor *= 0.25;
       else if ({ fire: 'water', shadow: 'light', earth: 'air' }[creature.ward] === element) factor *= 1.5;
