@@ -7,3 +7,6 @@ document.getElementById('combat').onclick=()=>prepare(false);
 document.getElementById('legacy').onclick=()=>prepare(true);
 document.getElementById('corrupt').onclick=()=>{if(allowed()){localStorage.setItem(key,'{broken');location.assign('../index.html');}};
 document.getElementById('restore').onclick=()=>{if(!allowed())return;const old=JSON.parse(localStorage.getItem(snapshot));for(const [k,value] of [[key,old.save],[backup,old.backup]])if(value===null)localStorage.removeItem(k);else localStorage.setItem(k,value);localStorage.removeItem(snapshot);location.assign('../index.html');};
+
+// Stage III scene uses only localhost and the same reversible test backup.
+document.getElementById('grammar').onclick=()=>{if(!allowed())return;const s=Arcana.createState(31719),sim=new Simulation(s);s.enemies=[];s.tiles.fill('soil');s.player.cap=80;s.player.hp=65;s.research=3;s.tutorial=5;s.player.mana=Object.fromEntries(Arcana.MANA.map(m=>[m.id,80]));s.knowledge.known=Arcana.MANA.map(m=>m.id);const e=sim.spawn('brute',s.player.x+180,s.player.y);e.hp=e.maxHp=500;e.speed=0;e.cool=999;for(let dy=-1;dy<=1;dy++)for(let dx=2;dx<=4;dx++)s.tiles[(53+dy)*104+52+dx]='water';localStorage.setItem(key,JSON.stringify(s));localStorage.removeItem(backup);location.assign('../index.html');};
