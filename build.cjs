@@ -1,7 +1,7 @@
 const fs=require('node:fs'),path=require('node:path');
 (async()=>{
   const {packager}=await import('@electron/packager');
-  const shipped=new Set(['assets','docs','node_modules','core.js','combat-rules.js','simulation.js','renderer.js','game.js','index.html','style.css','main.cjs','package.json','README.md','THIRD-PARTY-NOTICES.md']);
+  const shipped=new Set(['assets','docs','node_modules','knowledge.js','core.js','combat-rules.js','simulation.js','renderer.js','game.js','index.html','style.css','main.cjs','package.json','README.md','THIRD-PARTY-NOTICES.md']);
   const output=await packager({
     dir:__dirname,out:'dist',name:'Palimpsest',platform:'win32',arch:'x64',
     overwrite:true,asar:false,prune:true,icon:path.join(__dirname,'assets','icon.ico'),

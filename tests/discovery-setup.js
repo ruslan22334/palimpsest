@@ -1,0 +1,9 @@
+'use strict';
+// This fixture is excluded from desktop builds and never touches the normal 127.0.0.1 or file: save.
+const key='palimpsest.save.v1',backup=key+'.backup',snapshot='palimpsest.test.stage2.original';
+function allowed(){if(location.hostname!=='localhost'){document.getElementById('result').textContent='Откройте эту страницу через localhost, чтобы отделить тест от обычного сохранения.';return false;}if(!localStorage.getItem(snapshot))localStorage.setItem(snapshot,JSON.stringify({save:localStorage.getItem(key),backup:localStorage.getItem(backup)}));return true;}
+function prepare(legacy){if(!allowed())return;const s=Arcana.createState(31719),sim=new Simulation(s);s.enemies=[];s.tiles.fill('soil');for(let x=0;x<104;x++){s.tiles[x]='wall';s.tiles[103*104+x]='wall';s.tiles[x*104]='wall';s.tiles[x*104+103]='wall';}s.player.hp=65;s.player.mana.earth=60;s.tutorial=5;for(const dx of [80,160,240]){const e=sim.spawn('crawler',s.player.x+dx,s.player.y);e.hp=30;e.speed=0;e.cool=999;}if(legacy){s.version=1;s.shards=19;s.research=2;s.spells[2]={element:'life',form:'self',mod:'plain'};s.player.mana.life=24;delete s.player.mana.blood;delete s.player.mana.death;for(const k of ['knowledge','eventLedger','worldPopulated','nextEnemyId','terrainCredit'])delete s[k];}localStorage.setItem(key,JSON.stringify(s));localStorage.removeItem(backup);location.assign('../index.html');}
+document.getElementById('combat').onclick=()=>prepare(false);
+document.getElementById('legacy').onclick=()=>prepare(true);
+document.getElementById('corrupt').onclick=()=>{if(allowed()){localStorage.setItem(key,'{broken');location.assign('../index.html');}};
+document.getElementById('restore').onclick=()=>{if(!allowed())return;const old=JSON.parse(localStorage.getItem(snapshot));for(const [k,value] of [[key,old.save],[backup,old.backup]])if(value===null)localStorage.removeItem(k);else localStorage.setItem(k,value);localStorage.removeItem(snapshot);location.assign('../index.html');};
