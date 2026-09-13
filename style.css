@@ -15,3 +15,4 @@
 .live-casting{pointer-events:auto}
 .sky-clock{margin-top:7px;font-family:"Segoe UI",sans-serif;font-size:12px;color:#e6d4a5;text-align:center;letter-spacing:.3px}.sky-position{display:block;font-size:10px;color:var(--muted);margin-top:3px}.zone{pointer-events:none}.zone .sky-clock{background:#091c2399;padding:4px 9px;border-radius:3px}
 #toast{top:126px}.bossbar{top:126px}#hud:has(#bossbar:not([hidden]))~#toast{top:200px}
+.wall-inspect{position:absolute;background:#12262aef;border:1px solid #c4ad80;padding:7px 10px;font-size:12px;color:#efdbb6;white-space:nowrap;pointer-events:none}
