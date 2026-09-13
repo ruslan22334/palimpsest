@@ -15,3 +15,9 @@ function prepareSky(kind){if(!allowed())return;const s=Arcana.createState(31719)
 document.getElementById('daylight').onclick=()=>prepareSky('day');
 document.getElementById('nightlight').onclick=()=>prepareSky('night');
 document.getElementById('oldlight').onclick=()=>prepareSky('legacy');
+// Stage VI: open ground outside landmark protection with a stationary archer to the east.
+function prepareWalls(firing=true){if(!allowed())return;const s=Arcana.createState(31719);s.worldPopulated=true;s.enemies=[];s.tiles.fill('soil');s.time=80;s.player.x=1620;s.player.y=1620;s.player.cap=80;for(const k in s.player.mana)s.player.mana[k]=80;s.research=3;s.tutorial=5;s.spells[0]=Arcana.normalizeSpell({elements:['earth','air'],form:'bolt',mod:'plain'});const sim=new Simulation(s),e=sim.spawn('archer',1950,1620);e.speed=0;e.cool=firing?2:999;e.hp=e.maxHp=500;localStorage.setItem(key,JSON.stringify(s));localStorage.removeItem(backup);location.assign('../index.html');};
+
+
+document.getElementById('walls').onclick=()=>prepareWalls(true);
+document.getElementById('quiet-walls').onclick=()=>prepareWalls(false);

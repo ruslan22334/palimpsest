@@ -1,6 +1,6 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.Daylight=factory();})(globalThis,function(){
 'use strict';
-const CYCLE=480,TILE=40,SIZE=104,HEIGHT={tree:48,wall:40},RADIUS={tree:19,wall:21};
+const CYCLE=480,TILE=40,SIZE=104,HEIGHT={tree:48,wall:40,barrier:32},RADIUS={tree:19,wall:21,barrier:20};
 function sky(time=0){
  const elapsed=Number.isFinite(time)&&time>=0?time:0,total=8+elapsed*24/CYCLE,hour=total%24,daylight=hour>=6&&hour<18;
  const progress=(hour-6)/12,elevation=daylight?Math.sin(progress*Math.PI):0;
