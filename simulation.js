@@ -3,7 +3,7 @@
 const S=typeof Spellcraft!=='undefined'?Spellcraft:require('./spellcraft.js');
 const {SIZE,TILE,MANA,SHRINES,clamp,dist,cost,canPay,pay,terrainReaction,biome,manaRates}=A;
 class Simulation{
-constructor(state){this.s=state;this.random=A.rng(state.seed+Math.floor(state.time*10));this.events=[];this.particles=[];this.projectiles=[];this.fields=[];this.rings=[];this.delayed=[];this.floaters=[];this.cooldown=0;this.dashCooldown=0;this.invincible=0;this.haste=0;this.burnAura=0;this.shake=0;this.autoSave=0;this.rates={};state.nextEnemyId=Math.max(state.nextEnemyId,1+Math.max(0,...state.enemies.map(e=>e.id)));this.active=true;this.moving=false;this.terrainTimers=state.terrainTimers;this.pulse=0;if(!state.worldPopulated&&!state.won){this.populate();state.worldPopulated=true;}this.reveal();}
+constructor(state){this.s=state;this.random=A.rng(state.seed+Math.floor(state.time*10));this.events=[];this.particles=[];this.projectiles=[];this.fields=[];this.rings=[];this.delayed=[];this.floaters=[];this.cooldown=0;this.dashCooldown=0;this.invincible=0;this.haste=0;this.burnAura=0;this.shake=0;this.autoSave=0;this.rates={};this.exposure=A.daylight.exposure(state.tiles,state.player,state.time);state.nextEnemyId=Math.max(state.nextEnemyId,1+Math.max(0,...state.enemies.map(e=>e.id)));this.active=true;this.moving=false;this.terrainTimers=state.terrainTimers;this.pulse=0;if(!state.worldPopulated&&!state.won){this.populate();state.worldPopulated=true;}this.reveal();}
 emit(type,data={}){this.events.push({type,...data});}
 notice(text){this.emit('notice',{text});}
 observe(id){const f=K.FACTS[id];if(!f)return;const fresh=!this.s.knowledge.known.includes(f.element);if(K.observe(this.s.knowledge,id)){this.emit('discovery',{element:f.element,fresh,text:f.text});}}
@@ -11,8 +11,8 @@ ledger(e){const key=e.kind==='boss'?'boss':'enemy:'+e.id;return this.s.eventLedg
 eligible(e){return e&&Number.isSafeInteger(e.id)&&e.id>0&&e.guard!==99&&!e.summoned&&!e.friendly;}
 gainMana(element,amount,observation){if(!(amount>0))return;const p=this.s.player,gain=Math.max(0,Math.min(p.cap-p.mana[element],amount));p.mana[element]+=gain;this.s.stats.collected+=gain;this.observe(observation);if(gain>0)this.emit('mana',{element,amount:gain});}
 observeSources(){const p=this.s.player,tx=Math.floor(p.x/TILE),ty=Math.floor(p.y/TILE),near=new Set();for(let y=-1;y<=1;y++)for(let x=-1;x<=1;x++)near.add(this.s.tiles[(ty+y)*SIZE+tx+x]);for(const e of K.BASIC)if(this.rates[e]>0)this.observe('source:'+e);
-for(const [element,tile] of [['fire','fire'],['fire','lava'],['life','tree'],['light','crystal'],['shadow','rift'],['space','rift'],['space','obsidian']])if(this.rates[element]>0&&near.has(tile))this.observe('source:'+element+':'+tile);
-if(this.tile(p.x,p.y)==='ruin')this.observe('source:shadow:ruin');if(this.s.shrines.some(s=>s.status==='restored'&&Math.hypot(p.x-(s.x+.5)*TILE,p.y-(s.y+.5)*TILE)<160))this.observe('source:light:shrine');
+for(const [element,tile] of [['fire','fire'],['fire','lava'],['life','tree'],['space','rift'],['space','obsidian']])if(this.rates[element]>0&&near.has(tile))this.observe('source:'+element+':'+tile);
+if(this.rates.light>0)this.observe('source:light:sun');if(this.rates.shadow>0)this.observe(this.exposure.sun.daylight?'source:shadow:cast':'source:shadow:night-rift');
 }
 get level(){return this.s.shrines.filter(s=>s.status==='restored').length;}
 has(id){return this.s.relics.includes(id);}
@@ -139,7 +139,7 @@ startBoss(){const x=53.5*TILE,y=47.5*TILE;this.s.boss={kind:'boss',id:99999,x,y,
 enemyShot(e,angle,speed=155){this.projectiles.push({x:e.x,y:e.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life:4,r:e.kind==='boss'?8:6,enemy:true,attacker:{id:e.id,kind:e.kind,maxHp:e.maxHp,guard:e.guard,friendly:!!e.friendly,summoned:!!e.summoned},damage:e.kind==='boss'?15:e.damage,color:e.kind==='boss'?'#d3a0dc':'#f5a084'});}
 update(dt,input={x:0,y:0}){if(!this.active)return;dt=Math.min(dt,.05);const s=this.s,p=s.player;s.time+=dt;this.cooldown=Math.max(0,this.cooldown-dt);this.dashCooldown=Math.max(0,this.dashCooldown-dt);this.invincible=Math.max(0,this.invincible-dt);this.haste=Math.max(0,this.haste-dt);this.burnAura=Math.max(0,this.burnAura-dt);this.shake=Math.max(0,this.shake-dt*16);this.autoSave+=dt;this.pulse+=dt;
 let dx=input.x||0,dy=input.y||0,d=Math.hypot(dx,dy);const oldx=p.x,oldy=p.y;if(d){let speed=155*(this.has('stride')?1.12:1)*(this.haste>0?1.6:1);if(this.tile(p.x,p.y)==='water')speed*=.58;if(this.tile(p.x,p.y)==='tree')speed*=.8;if(this.tile(p.x,p.y)==='mud')speed*=.65;this.move(p,dx/d*speed*dt,dy/d*speed*dt);}this.moving=Math.hypot(oldx-p.x,oldy-p.y)>.1;
-this.rates=manaRates(s.tiles,p,this.moving,s.shrines.filter(s=>s.status==='restored'));for(const m of MANA){const amount=this.rates[m.id]*dt*(this.has('roots')?1.35:1);const gain=Math.min(p.cap-p.mana[m.id],amount);p.mana[m.id]+=gain;s.stats.collected+=gain;}this.observeSources();
+this.exposure=A.daylight.exposure(s.tiles,p,s.time);this.rates=manaRates(s.tiles,p,this.moving,[],s.time,this.exposure);for(const m of MANA){const amount=this.rates[m.id]*dt*(this.has('roots')?1.35:1);const gain=Math.min(p.cap-p.mana[m.id],amount);p.mana[m.id]+=gain;s.stats.collected+=gain;}this.observeSources();
 if(['lava','fire'].includes(this.tile(p.x,p.y)))this.hurt(this.tile(p.x,p.y)==='lava'?8:4);
 for(const [idx,timer]of Object.entries(this.terrainTimers)){timer.left-=dt;if(s.tiles[idx]!==timer.terrain){delete this.terrainTimers[idx];continue;}if(timer.left<=0){s.tiles[idx]=timer.after;delete this.terrainTimers[idx];delete s.terrainCredit[idx];this.emit('terrain',{index:Number(idx)});}}
 for(let i=this.delayed.length-1;i>=0;i--){const d=this.delayed[i];d.time-=dt;if(d.time<=0){this.delayed.splice(i,1);this.cast(d.target,true,d.spell);}}

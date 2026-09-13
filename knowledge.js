@@ -5,8 +5,12 @@
   'use strict';
   const BASIC = ['earth', 'water', 'air'];
   const FACTS = {};
+  const LEGACY_SOURCES=['source:light:crystal','source:light:shrine','source:shadow:ruin','source:shadow:rift'];
   function fact(id, element, kind, text) { FACTS[id] = { element, kind, text }; }
   const sources = {
+    'light:sun': ['light', 'Прямой солнечный свет наполняет сосуд днём. Под отбрасываемой тенью и ночью сбор прекращается; у полудня свет сильнее.'],
+    'shadow:cast': ['shadow', 'Днём тень деревьев и скал наполняет теневой сосуд. По мере движения солнца тени меняют направление и длину.'],
+    'shadow:night-rift': ['shadow', 'Ночью разломы отдают теневую ману. Обычная темнота сосуд не наполняет.'],
     'earth': ['earth', 'Неподвижность на почве, песке или камне наполняет сосуд земли.'],
     'water': ['water', 'Вода собирается в воде и у берега.'],
     'air': ['air', 'Движение наполняет сосуд воздуха.'],
@@ -55,7 +59,7 @@
   function initial() { return { known:[...BASIC], facts:BASIC.map(e=>'source:'+e) }; }
   function valid(k, ids) { return !!(k && Array.isArray(k.known) && Array.isArray(k.facts) && k.known.every(e=>ids.includes(e)) && new Set(k.known).size===k.known.length && BASIC.every(e=>k.known.includes(e)) && k.facts.every(id=>FACTS[id] && (FACTS[id].elements||[FACTS[id].element]).every(e=>k.known.includes(e))) && new Set(k.facts).size===k.facts.length); }
   function observe(k, id) { const f=FACTS[id]; if(!f||k.facts.includes(id))return false; for(const e of f.elements||[f.element])if(!k.known.includes(e))k.known.push(e); k.facts.push(id); return true; }
-  function entries(k, element, kind) { return k.facts.map(id=>FACTS[id]).filter(f=>f.element===element&&(!kind||f.kind===kind)); }
+  function entries(k, element, kind) { return k.facts.filter(id=>!LEGACY_SOURCES.includes(id)).map(id=>FACTS[id]).filter(f=>f.element===element&&(!kind||f.kind===kind)); }
   function view(k, mana) { const known=k.known.includes(mana.id); return {...mana, known, name:known?mana.name:'Неизвестно', color:known?mana.color:'#81918f', glyph:known?mana.glyph:'?', source:entries(k,mana.id,'source').map(f=>f.text).join(' ')||'Источник ещё не установлен. Наблюдайте за сосудом в разных условиях.'}; }
-  return { BASIC, FACTS, initial, valid, observe, entries, view };
+  return { LEGACY_SOURCES, BASIC, FACTS, initial, valid, observe, entries, view };
 });
