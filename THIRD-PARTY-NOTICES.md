@@ -6,4 +6,6 @@ The Windows distribution includes Electron and Chromium. Their licenses and thir
 
 Development tooling: Electron (MIT), @electron/packager (BSD-2-Clause), and their transitive dependencies. Exact versions are recorded in `package-lock.json`. These development tools are not game content.
 
-The project package is private / UNLICENSED: no open-source license is granted to the general public by this repository configuration. The project owner can choose publication terms separately.
+The GitHub repository is public. No open-source license has been selected for the game source; package metadata remains UNLICENSED. Public visibility does not itself grant an open-source license. The project owner can choose licensing terms separately.
+
+The `private: true` field in package.json prevents accidental publication to the npm registry; it does not control GitHub repository visibility.
