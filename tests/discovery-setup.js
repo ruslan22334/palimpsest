@@ -21,3 +21,6 @@ function prepareWalls(firing=true){if(!allowed())return;const s=Arcana.createSta
 
 document.getElementById('walls').onclick=()=>prepareWalls(true);
 document.getElementById('quiet-walls').onclick=()=>prepareWalls(false);
+
+// Stage VII: a reversible scene for draining, counterspells and empty vessels.
+document.getElementById('ecology').onclick=()=>{if(!allowed())return;const s=Arcana.createState();s.worldPopulated=true;s.ecology={populated:true,anomalies:[{id:1,x:1720,y:1620,element:'earth',neutralized:false}]};s.tiles.fill('ruin');s.player.x=1620;s.player.y=1620;s.time=80;s.tutorial=5;s.research=3;for(const id in s.player.mana)s.player.mana[id]=60;s.spells[0]=Arcana.normalizeSpell({element:'air',form:'bolt',mod:'plain'});const sim=new Simulation(s),e=sim.spawn('leech',1620,1735);e.drainElement='water';e.speed=0;localStorage.setItem(key,JSON.stringify(s));localStorage.removeItem(backup);location.assign('../index.html');};
