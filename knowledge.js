@@ -29,6 +29,9 @@
   };
   for (const [id, [element, text]] of Object.entries(sources)) fact('source:' + id, element, 'source', text);
   for(const [id,text] of Object.entries({brick:'Огонь обжигает стену: она лучше выдерживает давление.',mud:'Вода размягчает стену: давление воздуха разрушает её быстрее.',damage:'Удары разрушают стены. Бесплатная искра тоже помогает разобрать преграду.'}))fact('wall:'+id,id==='brick'?'fire':id==='mud'?'water':'earth','effect',text);
+  for(const element of ['earth','water','fire','space','life'])fact('ecology:drain:'+element,element,'effect','Цветная связь вытягивает этот запас маны. Отойдите от источника или закройтесь стеной; пустой сосуд не отдаёт ману.');
+  fact('ecology:interrupt','air','effect','Попадание заклинания сбивает подготовку пиявки. Страх и оглушение также прерывают высасывание.');
+  for(const [target,element,text]of [['earth','air','Воздух рассеивает каменный голод.'],['water','fire','Огонь гасит сухой колодец.'],['fire','water','Вода гасит холодный уголь.'],['space','light','Свет закрывает пустой шов.']])fact('ecology:counter:'+target,element,'effect',text+' Аномалия больше не высасывает ману.');
   const self = {
     earth: 'Воплощение земли создаёт каменный щит.', water: 'Воплощение воды защищает щитом и замедляет врагов рядом.',
     fire: 'Воплощение огня окружает мага обжигающим венцом.', air: 'Воплощение воздуха ускоряет мага и отбрасывает врагов.',

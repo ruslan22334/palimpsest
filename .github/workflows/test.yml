@@ -16,6 +16,7 @@ jobs:
           node-version: '24'
       - name: Check JavaScript syntax
         run: |
+          node --check ecology.js
           node --check fortifications.js
           node --check daylight.js
           node --check controls.js
