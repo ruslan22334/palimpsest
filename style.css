@@ -19,3 +19,5 @@
 
 .drain-alert{position:absolute;top:125px;left:50%;transform:translateX(-50%);padding:8px 12px;background:#231e2def;border:1px solid #c991aa;color:#f3c4ce;font-size:12px;text-align:center;max-width:360px;pointer-events:none}.mana.draining .mana-value{color:#f5a1ab}.mana.draining .mana-track{box-shadow:0 0 0 1px #cc7888}
 #hud:has(#drain-alert:not([hidden]))~#toast{top:180px}#hud:has(#bossbar:not([hidden])) .drain-alert{top:188px}#hud:has(#bossbar:not([hidden])):has(#drain-alert:not([hidden]))~#toast{top:240px}
+
+#mage-inspect{max-width:255px;white-space:normal;line-height:1.5}#player-status{color:#a9d6e2;min-height:0;margin-top:4px}

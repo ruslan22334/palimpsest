@@ -39,7 +39,7 @@ test('field repeats cannot repair or rebuild its destroyed wall',()=>{
  const sim=setup();sim.cast({x:1780,y:1620},false,recipe('field'));step(sim,.1);assert.ok(Object.keys(sim.s.walls).length);for(const i of Object.keys(sim.s.walls))sim.strikeWall(+i,{element:'earth',weight:20});step(sim,2);assert.equal(Object.keys(sim.s.walls).length,0);
 });
 test('v4 migration preserves campaign and rejects inconsistent wall metadata',()=>{
- const s=setup().s;s.version=4;delete s.walls;s.shards=27;const next=A.migrateSave(s);assert.equal(next.version,6);assert.deepEqual(next.walls,{});assert.equal(next.shards,27);for(const change of [s=>s.tiles[400]='barrier',s=>s.walls[400]={hp:80,maxHp:80,material:'earth'},s=>{s.tiles[400]='barrier';s.walls[400]={hp:-1,maxHp:80,material:'earth'};}]){const bad=structuredClone(next);change(bad);assert.equal(A.migrateSave(bad),null);}
+ const s=setup().s;s.version=4;delete s.walls;s.shards=27;const next=A.migrateSave(s);assert.equal(next.version,7);assert.deepEqual(next.walls,{});assert.equal(next.shards,27);for(const change of [s=>s.tiles[400]='barrier',s=>s.walls[400]={hp:80,maxHp:80,material:'earth'},s=>{s.tiles[400]='barrier';s.walls[400]={hp:-1,maxHp:80,material:'earth'};}]){const bad=structuredClone(next);change(bad);assert.equal(A.migrateSave(bad),null);}
 });
 test('a summoned creature never appears embedded in an existing wall',()=>{
  const sim=setup();sim.placeWall({x:1740,y:1620});const e=sim.spawn('shade',1740,1620,99);assert.equal(sim.blocked(e.x,e.y,18),false);assert.equal(e.homeX,e.x);assert.equal(e.homeY,e.y);

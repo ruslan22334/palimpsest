@@ -61,7 +61,7 @@ test('multi-component overkill and harvest award each defeated enemy only once',
  const sim=setup(),p=sim.s.player,e=target(sim);p.mana.blood=p.mana.death=0;p.mana.earth=0;e.hp=3;sim.hit(e,24,spell(['earth','blood','death'],'bolt','siphon'),p.x,p.y);close(p.mana.blood,.6);close(p.mana.death,4);close(p.mana.earth,7);assert.equal(sim.s.stats.kills,1);
 });
 test('v2 recipes migrate without changing costs or campaign, and v3 rejects corrupt grammar and timers',()=>{
- const s=setup().s;s.version=2;delete s.terrainTimers;s.spells=s.spells.map(({element,form,mod})=>({element,form,mod}));s.shards=17;const next=A.migrateSave(s);assert.ok(next);assert.equal(next.version,6);assert.equal(s.version,2);assert.equal(next.shards,17);for(let i=0;i<4;i++){assert.deepEqual(next.spells[i].elements,[s.spells[i].element]);assert.deepEqual(A.cost(next.spells[i]),A.cost(s.spells[i]));}assert.deepEqual(A.migrateSave(next),next);
+ const s=setup().s;s.version=2;delete s.terrainTimers;s.spells=s.spells.map(({element,form,mod})=>({element,form,mod}));s.shards=17;const next=A.migrateSave(s);assert.ok(next);assert.equal(next.version,7);assert.equal(s.version,2);assert.equal(next.shards,17);for(let i=0;i<4;i++){assert.deepEqual(next.spells[i].elements,[s.spells[i].element]);assert.deepEqual(A.cost(next.spells[i]),A.cost(s.spells[i]));}assert.deepEqual(A.migrateSave(next),next);
  for(const mutate of [s=>s.spells[0].elements=[],s=>s.spells[0].elements=Array(6).fill('earth'),s=>s.terrainTimers['1']={terrain:'ice',left:-1,after:'water'},s=>s.terrainTimers['1']={terrain:'ice',left:2,after:'invalid'}]){const copy=structuredClone(next);mutate(copy);assert.equal(A.migrateSave(copy),null);}
 });
 

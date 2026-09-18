@@ -7,6 +7,8 @@
   // Creature properties, rather than the renderer or AI, define reactions.
   // Multipliers are deliberately explicit for future shared player/enemy casting.
   const CREATURES = {
+    player: {name:'Маг',body:'living',element:'life',burns:true,grounded:true,fear:0,resist:{life:0.05}},
+    mage: {name:'Вражеский маг',body:'living',element:'life',burns:true,grounded:true,fear:.8,resist:{life:0.05}},
     leech: { name: 'Манная пиявка', body: 'living', element: 'water', burns: true, grounded: true, fear: 1.2, resist: {life: 0.05, water: 0.4, fire: 1.4} },
     crawler: { name: 'Корнеед', body: 'living', element: 'life', burns: true, grounded: true, fear: 1,
       resist: { life: 0.05, fire: 1.25, shadow: 0.8 } },
@@ -24,7 +26,7 @@
       resist: { life: 0.1 } }
   };
   const fallback = { name: 'Неизвестное существо', body: 'spirit', element: 'space', burns: false, grounded: false, fear: 0, resist: {} };
-  const profile = creature => CREATURES[typeof creature === 'string' ? creature : creature.kind] || fallback;
+  const profile = creature => CREATURES[typeof creature === 'string' ? creature : (creature.kind||'player')] || fallback;
 
   function multiplier(creature, element) {
     const body=profile(creature).body;
