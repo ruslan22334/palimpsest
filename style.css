@@ -21,3 +21,5 @@
 #hud:has(#drain-alert:not([hidden]))~#toast{top:180px}#hud:has(#bossbar:not([hidden])) .drain-alert{top:188px}#hud:has(#bossbar:not([hidden])):has(#drain-alert:not([hidden]))~#toast{top:240px}
 
 #mage-inspect{max-width:255px;white-space:normal;line-height:1.5}#player-status{color:#a9d6e2;min-height:0;margin-top:4px}
+
+.story-actions{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}.story-journal{margin-bottom:20px}.story-journal p+p{margin-top:12px}
