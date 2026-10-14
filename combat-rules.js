@@ -7,6 +7,7 @@
   // Creature properties, rather than the renderer or AI, define reactions.
   // Multipliers are deliberately explicit for future shared player/enemy casting.
   const CREATURES = {
+    forge: {name:'Сердце горна',body:'construct',element:'earth',burns:false,grounded:false,fear:0,resist:{fire:.35,life:0,shadow:.6}},
     player: {name:'Маг',body:'living',element:'life',burns:true,grounded:true,fear:0,resist:{life:0.05}},
     mage: {name:'Вражеский маг',body:'living',element:'life',burns:true,grounded:true,fear:.8,resist:{life:0.05}},
     leech: { name: 'Манная пиявка', body: 'living', element: 'water', burns: true, grounded: true, fear: 1.2, resist: {life: 0.05, water: 0.4, fire: 1.4} },
