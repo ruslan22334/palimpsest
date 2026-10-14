@@ -1,0 +1,37 @@
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./mages.js'));else root.ForgeChapter=factory(root.MageRules);})(globalThis,function(G){
+'use strict';
+const ORIN={id:'orin',name:'Орин · хранитель горна',x:3060,y:1180,npc:true};
+const CENTER={x:3060,y:980},GATES=[{x:2740,y:980,name:'Западный проход'},{x:3380,y:980,name:'Восточный проход'},{x:3060,y:660,name:'Северный проход'}];
+const WAVES=[['brute','archer','mage:earth'],['brute','mage:ember','archer'],['brute','mage:earth','mage:ember','sentinel']];
+const STAGES=['unmet','prepare','active','intermission','failed','restore','done','legacy'];
+function initial(legacy=false){return {stage:legacy?'legacy':'unmet',prepared:false,wave:0,away:0,ids:[],claimed:[],core:{...CENTER,kind:'forge',hp:220,maxHp:220,shield:0}};}
+function valid(q){return !!(q&&STAGES.includes(q.stage)&&typeof q.prepared==='boolean'&&Number.isInteger(q.wave)&&q.wave>=0&&q.wave<=3&&Number.isFinite(q.away)&&q.away>=0&&q.away<=10&&Array.isArray(q.ids)&&[0,10].includes(q.ids.length)&&new Set(q.ids).size===q.ids.length&&q.ids.every(id=>Number.isSafeInteger(id)&&id>0)&&Array.isArray(q.claimed)&&new Set(q.claimed).size===q.claimed.length&&q.claimed.every(id=>q.ids.includes(id))&&q.core&&q.core.kind==='forge'&&q.core.x===CENTER.x&&q.core.y===CENTER.y&&q.core.maxHp===220&&Number.isFinite(q.core.hp)&&q.core.hp>=0&&q.core.hp<=220&&q.core.shield===0&&(!['active','intermission','restore','done'].includes(q.stage)||q.ids.length===10&&q.wave>0)&&(!['restore','done'].includes(q.stage)||q.wave===3)&&(!['active','intermission'].includes(q.stage)||q.core.hp>0));}
+const active=s=>s.forge.stage==='active';
+function prepare(sim){const s=sim.s,q=s.forge;if(q.prepared||q.stage==='legacy')return;q.prepared=true;for(let y=15;y<=30;y++)for(let x=68;x<=84;x++){const i=y*104+x;if(s.tiles[i]==='barrier')continue;s.tiles[i]='soil';delete s.terrainTimers[i];delete s.terrainCredit[i];}
+ for(const [x,y,t]of [[70,22,'fire'],[82,22,'fire'],[73,29,'water'],[74,29,'water'],[78,29,'water'],[79,29,'water']])if(s.tiles[y*104+x]!=='barrier')s.tiles[y*104+x]=t;
+}
+function markers(s){return s.forge.stage==='legacy'?[]:[ORIN];}
+function goals(s){return ['legacy','done'].includes(s.forge.stage)?[]:active(s)?[{...CENTER,name:'Защитите горн'}]:[ORIN];}
+function objective(s){const q=s.forge;return {unmet:['Приказ в огне','Найдите Орина у Сердца горна на северо-востоке.'],prepare:['Подготовьте защиту','Постройте стены на подступах, соберите ману. Орин запустит первую волну, когда вы будете готовы.'],active:['Защитите Сердце горна',`Волна ${q.wave}/3 · горн ${Math.ceil(q.core.hp)}/220 · врагов ${s.enemies.filter(e=>e.guard===98&&e.hp>0).length}. ${q.away>0?'Вернитесь к горну: '+Math.ceil(10-q.away)+' с.':'Перехватывайте атаки и сбивайте заклинания магов.'}`],intermission:['Передышка у горна',`Волна ${q.wave}/3 отражена · горн ${Math.ceil(q.core.hp)}/220. Орин может починить горн за землю 12 + воду 8. Следующая волна — по вашей команде.`],failed:['Обряд сорван','Вернитесь к Орину. Можно повторить три волны; стены и прежние главы сохранены.'],restore:['Новый приказ','Горн защищён. Завершите обряд у печати: огонь 25 + земля 15.'],done:['Стражи услышали отмену','Орин переплавил старый приказ. Дорога ведёт к юго-восточной печати света.']}[q.stage]||null;}
+function dialogue(sim){const s=sim.s,q=s.forge;const actions=[];if(q.stage==='unmet')actions.push(['forge-accept','Подготовить защиту']);if(['prepare','failed'].includes(q.stage))actions.push(['forge-start',q.stage==='failed'?'Повторить защиту':'Начать первую волну']);if(q.stage==='intermission')actions.push(['forge-next','Начать следующую волну']);if(['active','intermission'].includes(q.stage)&&q.core.hp<220)actions.push(['forge-repair','Ремонт +50 · земля 12 + вода 8']);
+ return {title:'Орин · Приказ в огне',text:q.stage==='unmet'?'Стражи всё ещё стирают старый мир. Отмена приказа сохранилась в архиве Неры. Я переплавлю их руны. Защитите горн от трёх волн: стражи идут с запада, востока и севера, маги собирают ману в этом же мире. Стены задержат атаки; попадание сбивает подготовку заклинаний. Между волнами решайте сами, когда продолжить. Если горн разрушат, вы погибнете или уйдёте дальше 650 шагов на десять секунд, обряд придётся начать заново.':objective(s)[1],actions};
+}
+function interact(sim){if(Math.hypot(sim.s.player.x-ORIN.x,sim.s.player.y-ORIN.y)>68)return false;sim.emit('forgeDialogue',{id:'orin'});return true;}
+function wave(sim){const s=sim.s,q=s.forge,offset=WAVES.slice(0,q.wave).reduce((n,w)=>n+w.length,0);q.wave++;q.stage='active';q.away=0;
+ for(const [i,type]of WAVES[q.wave-1].entries()){const gate=GATES[i%3],e=sim.spawn(type.split(':')[0],gate.x+(i===3?40:0),gate.y,98);e.id=q.ids[offset+i];if(type.includes(':'))Object.assign(e,G.initial(type.split(':')[1]));}
+ sim.notice('Волна '+q.wave+'/3. Защитите горн!');sim.emit('save');
+}
+function choose(sim,action){const s=sim.s,q=s.forge;if(Math.hypot(s.player.x-ORIN.x,s.player.y-ORIN.y)>68)return false;
+ if(action==='forge-accept'&&q.stage==='unmet')q.stage='prepare';else if(action==='forge-start'&&['prepare','failed'].includes(q.stage)){if(!q.ids.length)q.ids=Array.from({length:10},()=>s.nextEnemyId++);q.core=initial().core;q.wave=0;wave(sim);}
+ else if(action==='forge-next'&&q.stage==='intermission')wave(sim);
+ else if(action==='forge-repair'&&['active','intermission'].includes(q.stage)&&q.core.hp<220){if(s.player.mana.earth<12||s.player.mana.water<8){sim.notice('Для ремонта нужны земля 12 + вода 8.');return false;}s.player.mana.earth-=12;s.player.mana.water-=8;q.core.hp=Math.min(220,q.core.hp+50);sim.notice('Орин укрепил горн.');}
+ else return false;sim.emit('save');return true;
+}
+function fail(sim,reason){const s=sim.s,q=s.forge;if(!['active','intermission'].includes(q.stage))return;q.stage='failed';q.away=0;s.enemies=s.enemies.filter(e=>e.guard!==98);sim.projectiles=sim.projectiles.filter(b=>b.attacker?.guard!==98);sim.fields=sim.fields.filter(b=>b.attacker?.guard!==98);sim.notice(reason+' Вернитесь к Орину для повторной попытки.');sim.emit('save');}
+function update(sim,dt){const s=sim.s,q=s.forge;if(!active(s))return;if(q.core.hp<=0){fail(sim,'Горн разрушен.');return;}q.away=Math.hypot(s.player.x-CENTER.x,s.player.y-CENTER.y)>650?Math.min(10,q.away+dt):0;if(q.away>=10){fail(sim,'Вы оставили горн без защиты.');return;}
+ if(!s.enemies.some(e=>e.guard===98&&e.hp>0)){q.stage=q.wave===3?'restore':'intermission';sim.projectiles=sim.projectiles.filter(b=>b.attacker?.guard!==98);sim.fields=sim.fields.filter(b=>b.attacker?.guard!==98);sim.notice(q.wave===3?'Три волны отражены. Завершите обряд у горна.':'Волна отражена. Подготовьтесь и поговорите с Орином.');sim.emit('save');}
+}
+function shrine(sim){const s=sim.s,q=s.forge;if(['legacy','done'].includes(q.stage))return false;if(q.stage!=='restore'){sim.notice(objective(s)[1]);return true;}if(s.player.mana.fire<25||s.player.mana.earth<15){sim.notice('Обряд: огонь 25 + земля 15.');return true;}s.player.mana.fire-=25;s.player.mana.earth-=15;q.stage='done';s.shrines[2].status='cleared';return false;}
+function journal(s){const o=objective(s);return o?`<div class="card story-journal"><span class="eyebrow">ГЛАВА III · ПРИКАЗ В ОГНЕ</span><h3>${o[0]}</h3><p>${o[1]}</p></div>`:'';}
+return {ORIN,CENTER,GATES,WAVES,initial,valid,active,prepare,markers,goals,objective,dialogue,interact,choose,fail,update,shrine,journal};
+});
