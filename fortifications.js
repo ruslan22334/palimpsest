@@ -9,6 +9,7 @@ function plan(s,center,origin=s.player){
  const landmarks=[...s.shrines.map(p=>({x:(p.x+.5)*TILE,y:(p.y+.5)*TILE})),{x:2100,y:2140},{x:2140,y:1900},s.checkpoint,...(s.chapter&&s.chapter.stage!=='legacy'?[{x:1940,y:2140},{x:1740,y:2140},{x:1460,y:2140},s.chapter.lev]:[]),...(s.archive&&s.archive.stage!=='legacy'?[{x:1060,y:1180},{x:1060,y:780},{x:860,y:980},{x:1260,y:980}]:[])];
  if(s.forge&&s.forge.stage!=='legacy')landmarks.push({x:3060,y:1180});
  if(s.mirror&&s.mirror.stage!=='legacy')landmarks.push({x:3220,y:3220},{x:3100,y:2900,radius:35},{x:3340,y:2900,radius:35});
+ if(s.seam&&s.seam.stage!=='legacy')landmarks.push({x:1140,y:3460},...[[940,3140],[1140,3140],[1140,2980],[1340,2980],[1340,2820],[1140,2820]].map(([x,y])=>({x,y,radius:35})));
  const actors=[s.player,...s.enemies.filter(e=>e.hp>0),...(s.boss?[s.boss]:[])];
  const cells=candidates.filter(i=>['soil','grass','sand','stone','mud'].includes(s.tiles[i])&&!landmarks.some(p=>Math.hypot(p.x-(i%SIZE+.5)*TILE,p.y-(Math.floor(i/SIZE)+.5)*TILE)<(p.radius??105))&&!actors.some(p=>Math.abs(p.x-(i%SIZE+.5)*TILE)<45&&Math.abs(p.y-(Math.floor(i/SIZE)+.5)*TILE)<45)&&!s.enemies.some(e=>Math.abs(e.homeX-(i%SIZE+.5)*TILE)<40&&Math.abs(e.homeY-(Math.floor(i/SIZE)+.5)*TILE)<40));
  let reason='';if(!cells.length)reason='Здесь нет свободной земли для стены.';else if(Object.keys(s.walls).length+cells.length>LIMIT)reason='Слишком много стен. Разберите старые.';

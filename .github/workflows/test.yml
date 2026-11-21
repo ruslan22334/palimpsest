@@ -16,6 +16,7 @@ jobs:
           node-version: '24'
       - name: Check JavaScript syntax
         run: |
+          node --check seam.js
           node --check mirror.js
           node --check forge.js
           node --check archives.js
