@@ -1,10 +1,11 @@
 const {app,BrowserWindow,Menu}=require('electron');
 const path=require('node:path'),fs=require('node:fs');
 app.setName('Palimpsest');
+const mirrorStudy = process.argv.includes('--mirror-study');
 const smoke=process.argv.includes('--smoke-test');
 if(smoke)app.setPath('userData',path.join(process.cwd(),'test-results','smoke-profile'));
 app.whenReady().then(()=>{
-  const win=new BrowserWindow({width:1440,height:900,minWidth:960,minHeight:640,show:!smoke,icon:path.join(__dirname,'assets','icon.png'),backgroundColor:'#08171d',title:'Палимпсест — Живая магия',webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true}});
+  const win=new BrowserWindow({width:1440,height:900,minWidth:960,minHeight:640,show:!smoke && !mirrorStudy,icon:path.join(__dirname,'assets','icon.png'),backgroundColor:'#08171d',title:'Палимпсест — Живая магия',webPreferences:{...(mirrorStudy ? {partition: 'mirror-study'} : {}),nodeIntegration:false,contextIsolation:true,sandbox:true}});
   Menu.setApplicationMenu(null);
   if(smoke){
     let finished=false;const errors=[];
@@ -14,7 +15,14 @@ app.whenReady().then(()=>{
     win.webContents.on('render-process-gone',(_event,details)=>finish(false,details.reason));
     setTimeout(()=>finish(false,'Renderer readiness timeout'),15000);
   }
-  win.loadFile('index.html');
+  if (mirrorStudy) {
+    require('./mirror-study.cjs').open(win).catch(error => {
+      console.error(error);
+      app.exit(1);
+    });
+  } else {
+    win.loadFile(path.join(__dirname,'index.html'));
+  }
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',e=>e.preventDefault());
   win.webContents.on('before-input-event',(e,input)=>{if(input.key==='F11'&&input.type==='keyDown'){win.setFullScreen(!win.isFullScreen());e.preventDefault();}});

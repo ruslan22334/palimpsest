@@ -22,3 +22,24 @@ test('death preserves completed testimony and world changes; no mana or loot fro
 test('migration v10 preserves started fourth arenas and previous chapters without mutating input',()=>{for(const status of ['dormant','active','cleared','restored']){const s=A.createState();s.version=10;delete s.mirror;s.shrines[3].status=status;const before=JSON.stringify(s),next=A.migrateSave(s);assert.equal(next.version,12);assert.equal(next.mirror.stage,status==='dormant'?'unmet':'legacy');assert.deepEqual(next.forge,s.forge);assert.equal(next.shrines[3].status,status);assert.equal(JSON.stringify(s),before);assert.deepEqual(A.migrateSave(next),next);}});
 test('corrupt saves cannot forge records, inject choices or invalid charge values',()=>{for(const change of [q=>q.stage='bad',q=>q.charge.sun=NaN,q=>q.charge.shade=5,q=>q.charge.sun=-1,q=>q.records=['sun'],q=>q.records=['bad'],q=>q.stage='choice',q=>q.choice='bad',q=>q.choice='reveal',q=>q.charge.sun=4]){const s=A.createState();change(s.mirror);assert.equal(A.migrateSave(s),null);}});
 test('garden decision changes Sera introduction without pre-discovering mana aspects',()=>{const sim=scene();sim.s.chapter.choice='grove';assert.match(L.dialogue(sim,'sera').text,/сохранили сад/);sim.s.chapter.choice='spring';assert.match(L.dialogue(sim,'sera').text,/дали саду Ивы воду/);assert.deepEqual(sim.s.knowledge.known,['earth','water','air']);});
+
+test('trial starts before the mirror decision with valid paid spells and a separate checkpoint', () => {
+  const trial = require('../mirror-study.cjs').createTrial();
+  assert.ok(A.validSave(trial));
+  assert.equal(trial.mirror.stage, 'unmet');
+  assert.ok(trial.shrines.slice(0,3).every(shrine => shrine.status === 'restored'));
+  assert.ok(trial.spells.every(spell => A.canPay(trial.player.mana, A.cost(spell))));
+  assert.equal(trial.player.x, L.SERA.x);
+  assert.notEqual(trial.player, trial.checkpoint);
+});
+
+test('night objectives offer the seam only while that chapter is available', () => {
+  const sim = scene();
+  accept(sim);
+  sim.s.time = 300;
+  assert.match(L.objective(sim.s)[1], /юго-западе/);
+  sim.s.seam.stage = 'done';
+  assert.doesNotMatch(L.objective(sim.s)[1], /юго-западе/);
+  sim.s.time = 80;
+  assert.doesNotMatch(L.objective(sim.s)[1], /Ночью/);
+});
